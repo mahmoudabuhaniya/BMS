@@ -19,3 +19,38 @@ staticfiles/
 build/
 .dart_tool/
 .pub-cache/
+# Remove the old .git folder completely (this deletes all history — safe because we're starting fresh)
+Remove-Item -Recurse -Force .git
+
+# Create a fresh .gitignore to block large/unneeded files
+@"
+# Django
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+venv/
+.env
+*.env
+
+# Flutter/Android
+build/
+android/app/build/
+my_mobile_app_old/
+*.zip
+*.tar.xz
+*.deb
+*.apk
+*.aab
+
+# Static/Media (if large)
+staticfiles/
+media/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+"@ | Out-File -Encoding utf8 .gitignore
