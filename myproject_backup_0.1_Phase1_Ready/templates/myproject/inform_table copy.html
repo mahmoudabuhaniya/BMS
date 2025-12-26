@@ -1,0 +1,99 @@
+<!-- Total Records Info -->
+<div class="mb-2 text-end">
+    <span class="badge bg-info ms-3 rounded-pill px-3 py-2 fw-bold">
+        Filtered: {{ total_records }} / Total: {{ total_all_records }} records
+    </span>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 text-center">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th>Submission Time</th>
+                        <th>IP Name</th>
+                        <th>Sector</th>
+                        <th>Indicator</th>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>ID Number</th>
+                        <th>Phone Number</th>
+                        <th>Date of Birth</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Governorate</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in submissions %}
+                        <tr>
+                            <td>{{ submission.Submission_Time|default:"N/A" }}</td>
+                            <td>{{ submission.IP_Name|default:"N/A" }}</td>
+                            <td>{{ submission.Sector|default:"N/A" }}</td>
+                            <td>{{ submission.Indicator|default:"N/A" }}</td>
+                            <td>{{ submission.Date|default:"N/A" }}</td>
+                            <td>{{ submission.Name|default:"N/A" }}</td>
+                            <td>{{ submission.ID_Number|default:"N/A" }}</td>
+                            <td>{{ submission.Phone_Number|default:"N/A" }}</td>
+                            <td>{{ submission.Date_of_Birth|default:"N/A" }}</td>
+                            <td>{{ submission.Age|default:"N/A" }}</td>
+                            <td>{{ submission.Gender|default:"N/A" }}</td>
+                            <td>{{ submission.Governorate|default:"N/A" }}</td>
+                            <td><!-- Details button -->
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-info" 
+                                        title="View details"
+                                        onclick="window.location.href='{% url 'inform_details' submission.record_id %}'">
+                                    <i class="fa fa-info"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="11" class="text-center">No records found</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+<nav class="mt-3">
+    <ul class="pagination justify-content-center">
+        {% if submissions.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"><i class="fas fa-angles-left"></i></i></a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ submissions.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"><i class="fas fa-angle-left"></i></a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link"><i class="fas fa-angles-left"></i></span></li>
+            <li class="page-item disabled"><span class="page-link"><i class="fas fa-angle-left"></i></span></li>
+        {% endif %}
+
+        {% for num in submissions.paginator.page_range %}
+            {% if submissions.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num >= submissions.number|add:-2 and num <= submissions.number|add:2 %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if submissions.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ submissions.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"><i class="fas fa-angle-right text-primary"></i></a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ submissions.paginator.num_pages }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"><i class="fas fa-angles-right text-primary"></i></a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link"><i class="fas fa-angle-right"></i></span></li>
+            <li class="page-item disabled"><span class="page-link"><i class="fas fa-angles-right"></i></span></li>
+        {% endif %}
+    </ul>
+</nav>

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ONA-Stack — Optimal Next-Gen Applications</title>
+  <meta name="description" content="ONA-Stack: modern SaaS apps & platforms. Cloud, AI automation, analytics and integrations." />
+  <link rel="icon" href="assets/favicon.ico" />
+
+  <!-- Swiper for compact slider -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+  <!-- Google font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#ffffff;
+      --muted:#6b7280;
+      --accent1:#0056FF;    /* deep blue */
+      --accent2:#0BCBFF;    /* cyan */
+      --card:#f8fbff;
+      --glass: rgba(255,255,255,0.6);
+      --radius:14px;
+      --max-width:1100px;
+    }
+    /* Reset & layout */
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto; color:#0B1A2B;}
+    a{color:var(--accent1);text-decoration:none}
+    .container{width:90%;max-width:var(--max-width);margin:0 auto}
+    /* Header logo only (no navbar) */
+    header{padding:28px 0; display:flex; justify-content:flex-start; align-items:center; gap:18px}
+    header img.logo{height:48px}
+    header .brand-title{font-weight:700;font-size:1.05rem;color:var(--accent1);letter-spacing:.2px}
+
+    /* Hero (compact) */
+    .hero{
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:28px;
+      align-items:center;
+      padding:22px 0 36px;
+    }
+    .hero-left{
+      padding:28px; border-radius:16px; background:linear-gradient(180deg, #ffffff, #fbfdff);
+      box-shadow: 0 10px 40px rgba(9,30,66,0.06); border:1px solid rgba(9,30,66,0.03);
+    }
+    .eyebrow{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;font-weight:700;font-size:.75rem}
+    .hero-title{font-size:1.8rem;font-weight:700;margin:12px 0 8px;line-height:1.02}
+    .hero-sub{color:var(--muted);margin-bottom:18px}
+    .hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
+    .btn-primary{
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      color:white;padding:10px 16px;border-radius:999px;border:none;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(11,92,255,0.12)
+    }
+    .btn-ghost{background:transparent;border:1px solid rgba(11,26,43,0.06);padding:10px 16px;border-radius:999px;color:var(--accent1);font-weight:700;cursor:pointer}
+    .kpis{display:flex;gap:18px;margin-top:18px;flex-wrap:wrap}
+    .kpi{background:linear-gradient(180deg,#ffffff,var(--card));padding:12px 14px;border-radius:10px;box-shadow:0 6px 20px rgba(11,26,43,0.04);min-width:100px}
+    .kpi .num{font-weight:800;color:var(--accent1);font-size:1.15rem}
+    .kpi .lbl{font-size:.85rem;color:var(--muted)}
+
+    /* Hero-right (compact sliding images) */
+    .hero-right{
+      background:linear-gradient(180deg,#fbfdff,#f6fbff);
+      border-radius:16px;padding:12px;border:1px solid rgba(9,30,66,0.03);box-shadow:0 10px 36px rgba(9,30,66,0.04);
+    }
+    .swiper{height:260px;border-radius:12px;overflow:hidden}
+    .swiper-slide{display:flex;align-items:center;justify-content:center;background: #eaf8ff}
+    .slide-caption{position:absolute;left:20px;bottom:20px;background:rgba(0,0,0,0.45);color:white;padding:8px 12px;border-radius:10px;font-weight:600;font-size:.95rem}
+
+    /* Sections */
+    section{padding:56px 0;border-top:1px solid rgba(9,30,66,0.03)}
+    h2{font-size:1.25rem;color:#081226;margin:0 0 8px}
+    p.lead{color:var(--muted);margin:0 0 20px}
+
+    /* Apps / Ads grid */
+    .apps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+    .app-card{background:white;border-radius:12px;padding:18px;border:1px solid rgba(9,30,66,0.04);box-shadow:0 8px 28px rgba(9,30,66,0.04);display:flex;gap:12px;align-items:center}
+    .app-icon{width:56px;height:56px;border-radius:10px;background:linear-gradient(180deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:20px}
+    .app-meta h4{margin:0;font-size:1rem}
+    .app-meta p{margin:4px 0 0;color:var(--muted);font-size:.92rem}
+
+    /* Features */
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .feature{padding:18px;border-radius:12px;background:linear-gradient(180deg,#fff,#fcfeff);box-shadow:0 10px 30px rgba(9,30,66,0.04)}
+    .feature h5{margin:10px 0 6px}
+
+    /* Testimonials (carousel-esque) */
+    .testi-wrap{display:flex;gap:16px;overflow:auto;padding:6px 4px}
+    .testi{min-width:260px;background:#fff;padding:14px;border-radius:12px;border:1px solid rgba(9,30,66,0.03);box-shadow:0 8px 24px rgba(9,30,66,0.04)}
+    .testi p{color:var(--muted);font-size:.95rem}
+
+    /* CTA strip */
+    .cta-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;border-radius:12px;background:linear-gradient(90deg, rgba(0,118,255,0.06), rgba(11,203,255,0.04));border:1px solid rgba(11,92,255,0.06)}
+    .cta-strip h3{margin:0;font-size:1.05rem}
+    .cta-strip p{margin:0;color:var(--muted)}
+
+    /* Footer */
+    footer{padding:36px 0;color:var(--muted);font-size:.92rem;text-align:center}
+
+    /* Reveal animation helpers */
+    .reveal{opacity:0;transform:translateY(10px);transition:all .8s cubic-bezier(.2,.9,.25,1)}
+    .reveal.visible{opacity:1;transform:none}
+    @media (max-width:1000px){
+      .hero{grid-template-columns:1fr;gap:18px}
+      .hero-right{order:-1}
+      .features{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- header (logo only) -->
+    <header>
+      <img src="assets/logo.png" class="logo" alt="ONA-Stack logo" />
+      <div class="brand-title">ONA-Stack</div>
+    </header>
+
+    <!-- HERO: compact left copy, right small slider -->
+    <section class="hero">
+      <div class="hero-left">
+        <div class="eyebrow">New • Cloud-Ready</div>
+        <div class="hero-title">Optimal Next-Gen SaaS — simple, fast, and enterprise-ready</div>
+        <div class="hero-sub">Host apps on secure subdomains, integrate with your stack, and automate operations with AI-enabled workflows.</div>
+
+        <div class="hero-ctas">
+          <button class="btn-primary" id="startTrial">Start 14-day Trial</button>
+          <a class="btn-ghost" href="https://portal.ona-stack.com" target="_blank" rel="noopener">Go to Apps Portal</a>
+        </div>
+
+        <div class="kpis" style="margin-top:18px">
+          <div class="kpi"><div class="num">99.99%</div><div class="lbl">Uptime</div></div>
+          <div class="kpi"><div class="num">+50</div><div class="lbl">Integrations</div></div>
+          <div class="kpi"><div class="num">14d</div><div class="lbl">Free Trial</div></div>
+        </div>
+      </div>
+
+      <aside class="hero-right">
+        <!-- Swiper slider -->
+        <div class="swiper" id="heroSwiper">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide" style="position:relative">
+              <img src="assets/hero1.jpg" alt="Dashboard preview" style="width:100%;height:100%;object-fit:cover">
+              <div class="slide-caption">Analytics Dashboard — real-time insights</div>
+            </div>
+            <div class="swiper-slide" style="position:relative">
+              <img src="assets/hero2.jpg" alt="Automation preview" style="width:100%;height:100%;object-fit:cover">
+              <div class="slide-caption">AI Automations — save time</div>
+            </div>
+            <div class="swiper-slide" style="position:relative">
+              <img src="assets/hero3.jpg" alt="Integration preview" style="width:100%;height:100%;object-fit:cover">
+              <div class="slide-caption">Seamless Integrations</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- APPS / ADVERTISING -->
+    <section id="apps" class="reveal">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">
+        <div>
+          <h2>Our Apps</h2>
+          <p class="lead">Each app is hosted on its own secure subdomain — try the demos or jump straight to your portal.</p>
+        </div>
+        <div style="text-align:right">
+          <a href="https://portal.ona-stack.com" class="btn-primary">Open Apps Portal</a>
+        </div>
+      </div>
+
+      <div class="apps-grid">
+        <article class="app-card">
+          <div class="app-icon">CRM</div>
+          <div class="app-meta">
+            <h4>CRM Suite</h4>
+            <p>Customer lifecycle, pipelines, and automation.<br><a href="https://crm.ona-stack.com" target="_blank" rel="noopener">crm.ona-stack.com →</a></p>
+          </div>
+        </article>
+
+        <article class="app-card">
+          <div class="app-icon">AI</div>
+          <div class="app-meta">
+            <h4>AI Automator</h4>
+            <p>Set triggers and run intelligent workflows.<br><a href="https://ai.ona-stack.com" target="_blank" rel="noopener">ai.ona-stack.com →</a></p>
+          </div>
+        </article>
+
+        <article class="app-card">
+          <div class="app-icon">AN</div>
+          <div class="app-meta">
+            <h4>Analytics Hub</h4>
+            <p>Custom dashboards & alerts.<br><a href="https://analytics.ona-stack.com" target="_blank" rel="noopener">analytics.ona-stack.com →</a></p>
+          </div>
+        </article>
+
+        <article class="app-card">
+          <div class="app-icon">SP</div>
+          <div class="app-meta">
+            <h4>Support Portal</h4>
+            <p>Tickets, docs and SLA management.<br><a href="https://support.ona-stack.com" target="_blank" rel="noopener">support.ona-stack.com →</a></p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="reveal">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">
+        <div>
+          <h2>Why ONA-Stack</h2>
+          <p class="lead">Built for teams who want speed, security and extensibility.</p>
+        </div>
+      </div>
+
+      <div class="features">
+        <div class="feature">
+          <div style="font-size:22px;font-weight:800;color:var(--accent1)">01</div>
+          <h5>Enterprise security</h5>
+          <p class="text-muted">SAML/SSO, encryption-at-rest, and SOC-ready practices.</p>
+        </div>
+        <div class="feature">
+          <div style="font-size:22px;font-weight:800;color:var(--accent1)">02</div>
+          <h5>Scalable architecture</h5>
+          <p class="text-muted">Auto-scaling containers and multi-region support.</p>
+        </div>
+        <div class="feature">
+          <div style="font-size:22px;font-weight:800;color:var(--accent1)">03</div>
+          <h5>Open integrations</h5>
+          <p class="text-muted">APIs, webhooks and prebuilt connectors for major tools.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section id="testimonials" class="reveal">
+      <h2>Customers say</h2>
+      <p class="lead">Short feedback that highlights impact.</p>
+
+      <div class="testi-wrap" aria-label="Testimonials">
+        <div class="testi">
+          <strong>Sarah, Product</strong>
+          <p>“Replaced three tools with one platform — onboarding was fast and analytics are sharp.”</p>
+        </div>
+
+        <div class="testi">
+          <strong>Omar, IT</strong>
+          <p>“Integrations were straightforward and support responded within an hour.”</p>
+        </div>
+
+        <div class="testi">
+          <strong>Leah, Ops</strong>
+          <p>“Automations saved our team dozens of hours each month.”</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA STRIP -->
+    <section class="reveal">
+      <div class="cta-strip">
+        <div>
+          <h3>Start your 14-day free trial</h3>
+          <p class="small">Full access to core features — no credit card required.</p>
+        </div>
+        <div style="display:flex;gap:12px">
+          <button class="btn-primary" id="trialBtn2">Start Free Trial</button>
+          <a class="btn-ghost" href="#contact">Contact Sales</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT / FOOTER -->
+    <section id="contact" class="reveal">
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start">
+        <div>
+          <h2>Contact</h2>
+          <p class="lead">Questions about integrations or enterprise pricing? We’ll respond fast.</p>
+          <p style="margin-top:12px"><strong>Email</strong>: <a href="mailto:info@ona-stack.com">info@ona-stack.com</a><br>
+          <strong>Sales</strong>: <a href="mailto:sales@ona-stack.com">sales@ona-stack.com</a></p>
+        </div>
+
+        <aside style="background:#fff;padding:18px;border-radius:12px;border:1px solid rgba(9,30,66,0.03);box-shadow:0 8px 24px rgba(9,30,66,0.04)">
+          <h4 style="margin:0 0 6px">Newsletter</h4>
+          <p class="small" style="margin:0 0 10px;color:var(--muted)">Product updates and release notes.</p>
+          <form onsubmit="event.preventDefault();alert('Thanks — please connect your newsletter endpoint.');">
+            <div style="display:flex;gap:8px">
+              <input type="email" required placeholder="Your work email" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(9,30,66,0.06)">
+              <button class="btn-primary" type="submit">Subscribe</button>
+            </div>
+          </form>
+        </aside>
+      </div>
+    </section>
+
+    <footer style="margin-top:40px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px">
+        <img src="assets/logo.png" alt="ONA-Stack" style="height:28px;opacity:.95">
+        <div style="color:var(--muted)">© 2025 ONA-Stack • Optimal Next-Gen Applications</div>
+      </div>
+      <div style="color:var(--muted)">Privacy • Terms • Status</div>
+    </footer>
+  </div>
+
+  <!-- Libraries (Swiper + GSAP) -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" integrity="sha512-KX..." crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    // Initialize compact Swiper slider
+    const swiper = new Swiper('#heroSwiper', {
+      loop:true,
+      effect: 'fade',
+      autoplay:{delay:4200, disableOnInteraction:false},
+      speed:800,
+    });
+
+    // Simple reveal on scroll using IntersectionObserver + small GSAP pop
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('visible');
+          // pop in with GSAP subtle lift
+          gsap.fromTo(entry.target, {y:8, opacity:0}, {y:0, opacity:1, duration:0.7, ease:'power3.out'});
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {threshold: 0.12});
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // CTA button hooks (example - open portal)
+    document.getElementById('startTrial').addEventListener('click', () => {
+      window.open('https://portal.ona-stack.com/signup', '_blank');
+    });
+    document.getElementById('trialBtn2').addEventListener('click', () => {
+      window.open('https://portal.ona-stack.com/signup', '_blank');
+    });
+
+    // Accessibility: keyboard controls for swiper
+    document.getElementById('heroSwiper').addEventListener('keydown', e => {
+      if(e.key === 'ArrowLeft') swiper.slidePrev();
+      if(e.key === 'ArrowRight') swiper.slideNext();
+    });
+  </script>
+</body>
+</html>

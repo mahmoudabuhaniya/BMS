@@ -1,0 +1,29 @@
+{% extends "myproject/base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Beneficiary Details</h3>
+    <table class="table table-bordered">
+        <tr><th>Record ID</th><td>{{ record.record_id }}</td></tr>
+        <tr><th>InForm ID</th><td>{{ record.InForm_ID }}</td></tr>
+        <tr><th>IP Name</th><td>{{ record.IP_Name }}</td></tr>
+        <tr><th>Sector</th><td>{{ record.Sector }}</td></tr>
+        <tr><th>Indicator</th><td>{{ record.Indicator }}</td></tr>
+        <tr><th>Date</th><td>{{ record.Date }}</td></tr>
+        <tr><th>Name</th><td>{{ record.Name }}</td></tr>
+        <tr><th>ID Number</th><td>{{ record.ID_Number }}</td></tr>
+        <tr><th>Phone Number</th><td>{{ record.Phone_Number }}</td></tr>
+        <tr><th>Date of Birth</th><td>{{ record.Date_of_Birth }}</td></tr>
+        <tr><th>Age</th><td>{{ record.Age }}</td></tr>
+        <tr><th>Gender</th><td>{{ record.Gender }}</td></tr>
+        <tr><th>Governorate</th><td>{{ record.Governorate }}</td></tr>
+        <tr><th>Municipality</th><td>{{ record.Municipality }}</td></tr>
+        <tr><th>Neighborhood</th><td>{{ record.Neighborhood }}</td></tr>
+        <tr><th>Site Name</th><td>{{ record.Site_Name }}</td></tr>
+        <tr><th>Disability Status</th><td>{{ record.Disability_Status }}</td></tr>
+        <tr><th>Submission Time</th><td>{{ record.Submission_Time }}</td></tr>
+        <tr><th>Created At</th><td>{{ record.created_at }}</td></tr>
+    </table>
+    <button type="button" class="btn btn-secondary" onclick="history.back()">Back</button>
+
+</div>
+{% endblock %}

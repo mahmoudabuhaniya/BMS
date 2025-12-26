@@ -1,0 +1,55 @@
+{% extends "myproject/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+
+  <div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body text-center p-5">
+
+      <!-- SUCCESS ICON -->
+      <div class="mb-4">
+        <i class="fas fa-check-circle fa-4x text-success"></i>
+      </div>
+
+      <!-- TITLE -->
+      <h3 class="fw-bold text-success mb-2">
+        Bulk Supply Import Completed
+      </h3>
+
+      <!-- SUBTITLE -->
+      <p class="text-muted mb-4">
+        The beneficiaries have been processed successfully.
+        You can now download the result or start a new bulk import.
+      </p>
+
+      <!-- ACTION BUTTONS -->
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
+
+        <!-- DOWNLOAD -->
+        <a href="{% url 'bulk_supply_export_excel' batch_id %}"
+        class="btn btn-success">
+        Download Excel
+        </a>
+
+
+        <!-- NEW IMPORT -->
+        <a href="{% url 'supply_dashboard' %}"
+           class="btn btn-outline-primary px-4 py-2 fw-semibold shadow-sm">
+          <i class="fas fa-redo me-2"></i>
+          Back to Supply Page
+        </a>
+
+      </div>
+
+      <!-- FOOT NOTE -->
+      <div class="mt-4 text-muted small">
+        <i class="fas fa-info-circle me-1"></i>
+        Download includes <b>Eligible</b> and <b>Not Eligible</b> sheets.
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

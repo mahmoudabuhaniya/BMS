@@ -1,0 +1,336 @@
+{% extends 'myproject/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <div id="assign-alert"></div>
+    
+    <!-- Last Sync Info -->
+    <div id="last-sync-info" class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+        <!-- Centered text -->
+        <div class="mx-auto text-center">
+            <strong>Last Sync Time:</strong> <span id="last-sync-time">{{ last_sync_time }}</span>
+        </div>
+
+        
+        <!-- Sync button on the right -->
+        <form id="sync-form" 
+            action="{% url 'sync_data' %}" 
+            method="POST" 
+            data-progress-url="{% url 'get_progress' %}" 
+            onsubmit="startSync(event)"
+            class="ms-auto">
+            {% csrf_token %}
+            <button id="assignHouseholdsButton" class="btn btn-warning">
+                <i class="fas fa-home me-1"></i> Assign Households
+            </button>
+
+            <button id="sync-btn" type="submit" class="btn btn-success">
+                <i class="fas fa-sync-alt me-2"></i>
+                <span>Sync Data</span>
+            </button>
+        </form>
+    </div>
+        <div id="csrf-token" data-csrf-token="{{ csrf_token }}"></div>
+
+    <!-- Sync Progress -->
+    <div id="progress-container" style="display: none;">
+        <div class="progress-wrapper">
+            <div class="progress">
+                <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"></div>
+            </div>
+            <p id="progress-message" class="status-message mt-2"></p>
+        </div>
+    </div>    
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-primary fw-bold mb-0">DASHBOARD</h1>
+        <span class="badge bg-info ms-3 rounded-pill px-3 py-2">Last Sync Time: {{ last_sync_time }}</span>
+    </div>
+
+<!-- ------------------Begin Dashboard Charts.---------------------------------------------------------- -->
+<div class="row g-4 justify-content-center">
+    <!-- Chart 1: Gender Distribution -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title text-center">Gender Distribution</h5>
+                <canvas id="genderChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 2: Age Groups -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title text-center">Age Groups</h5>
+                <canvas id="ageChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 3: Beneficiaries by Sector -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title text-center">Beneficiaries by IP</h5>
+                <canvas id="sectorChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 4: Submissions Over Time -->
+    <div class="col-md-12 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title text-center">Submissions Over Time</h5>
+                <canvas id="submissionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 5: Governorates Distribution -->
+    <div class="col-md-12 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title text-center">Governorates Distribution</h5>
+                <canvas id="govChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Gender Chart
+    new Chart(document.getElementById('genderChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ gender_labels|safe }},
+            datasets: [{
+                data: {{ gender_data|safe }},
+                backgroundColor: ['#0d6efd', '#dc3545', '#ffc107']
+            }]
+        }
+    });
+
+    // Age Chart
+    new Chart(document.getElementById('ageChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ age_labels|safe }},
+            datasets: [{
+                label: 'Beneficiaries',
+                data: {{ age_data|safe }},
+                backgroundColor: '#0dcaf0'
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    // Sector Chart
+    new Chart(document.getElementById('sectorChart'), {
+        type: 'pie',
+        data: {
+            labels: {{ sector_labels|safe }},
+            datasets: [{
+                data: {{ sector_data|safe }},
+                backgroundColor: ['#198754','#0d6efd','#ffc107','#dc3545','#6f42c1']
+            }]
+        }
+    });
+
+    // Submissions Over Time
+    new Chart(document.getElementById('submissionChart'), {
+        type: 'line',
+        data: {
+            labels: {{ submission_labels|safe }},
+            datasets: [{
+                label: 'Submissions',
+                data: {{ submission_data|safe }},
+                borderColor: '#0d6efd',
+                fill: false,
+                tension: 0.3
+            }]
+        }
+    });
+
+    // Governorates Chart
+    new Chart(document.getElementById('govChart'), {
+        type: 'bar', // old Chart.js v2, for v3 use 'bar' with indexAxis: 'y'
+        data: {
+            labels: {{ gov_labels|safe }},
+            datasets: [{
+                label: 'Beneficiaries',
+                data: {{ gov_data|safe }},
+                backgroundColor: '#fd7e14'
+            }]
+        },
+        options: { indexAxis: 'y' }
+    });
+</script>
+<!-- ------------------End Dashboard Charts.---------------------------------------------------------- -->
+
+
+ 
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function startSync(event) {
+    event.preventDefault();
+
+    const form = document.getElementById('sync-form');
+    const progressUrl = form.dataset.progressUrl;
+    const csrfToken = document.getElementById('csrf-token').dataset.csrfToken;
+
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    const progressMessage = document.getElementById('progress-message');
+    const syncbtn = document.getElementById('reassign-btn').addEventListener('click', function(){
+            syncbtn.disabled = true;
+            syncbtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Syncing...';});
+    // Reset UI
+    progressContainer.style.display = 'block';
+    progressContainer.style.opacity = 1;
+    progressBar.style.width = '0%';
+    progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary';
+    progressMessage.textContent = "Starting sync...";
+
+    let syncCompleted = false;
+
+    // Trigger sync
+    fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Sync request failed.');
+    })
+    .catch(error => {
+        syncCompleted = true;
+        progressBar.className = 'progress-bar bg-danger';
+        progressBar.style.width = '100%';
+        progressMessage.textContent = "❌ Error: " + error.message;
+        setTimeout(() => fadeOutProgress(progressContainer), 4000);
+    });
+
+    // Poll progress
+    const interval = setInterval(() => {
+        if (syncCompleted) {
+            clearInterval(interval);
+            return;
+        }
+        fetch(progressUrl)
+            .then(response => response.json())
+            .then(data => {
+                const {
+                    progress, stage,
+                    new_count, duplicate_count,
+                    invalid_date_count, total_fetched,
+                    household_changes, completed
+                } = data;
+
+                progressBar.style.width = progress + '%';
+                progressMessage.textContent = stage;
+
+                if (completed) {
+                    syncCompleted = true;
+                    progressBar.className = 'progress-bar bg-success';
+                    progressBar.style.width = '100%';
+                    progressMessage.innerHTML = `✅ Sync completed:<br>
+                        ${new_count} new added, 
+                        ${duplicate_count} skipped,<br>
+                        total fetched: ${total_fetched}.<br>
+                        Household: ${household_changes}.`;
+
+                    // 🎯 Fade out after a few seconds, no instant reload
+                    setTimeout(() => fadeOutProgress(progressContainer), 5000);
+                }
+            })
+            .catch(() => {
+                clearInterval(interval);
+                syncCompleted = true;
+                progressBar.className = 'progress-bar bg-success';
+                progressBar.style.width = '100%';
+                progressMessage.textContent = "✅ Sync completed (connection closed)";
+                setTimeout(() => fadeOutProgress(progressContainer), 4000);
+            });
+    }, 2000);
+}
+
+// 💫 Smooth fade-out helper
+function fadeOutProgress(container) {
+    container.style.transition = 'opacity 1s ease';
+    container.style.opacity = 0;
+    setTimeout(() => {
+        container.style.display = 'none';
+        // Optionally reload after fade-out:
+        // location.reload();
+    }, 1000);
+}
+</script>
+
+
+<script>
+document.getElementById("assignHouseholdsButton").addEventListener("click", () => {
+  const btn = document.getElementById("assignHouseholdsButton");
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Assigning...`;
+
+  // Create or reuse alert box
+  let alertBox = document.getElementById("assign-alert");
+  if (!alertBox) {
+    alertBox = document.createElement("div");
+    alertBox.id = "assign-alert";
+    alertBox.className = "alert mt-3 text-center";
+    document.querySelector(".container").prepend(alertBox);
+  }
+
+  // Show initial alert
+  alertBox.className = "alert alert-info mt-3 text-center";
+  alertBox.innerHTML = `<i class="fas fa-hourglass-half me-1"></i> Assigning households, please wait...`;
+
+  fetch("/assign-households/")
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "success") {
+        alertBox.className = "alert alert-success mt-3 text-center";
+        alertBox.innerHTML = `<i class="fas fa-check-circle me-1"></i> ${data.message}`;
+        fadeOutAlert(alertBox, 5000); // success fades after 5s
+      } else {
+        alertBox.className = "alert alert-danger mt-3 text-center";
+        alertBox.innerHTML = `<i class="fas fa-times-circle me-1"></i> ${data.message}`;
+        fadeOutAlert(alertBox, 8000); // error fades after 8s
+      }
+    })
+    .catch(() => {
+      alertBox.className = "alert alert-danger mt-3 text-center";
+      alertBox.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i> An error occurred while assigning households.`;
+      fadeOutAlert(alertBox, 8000);
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fas fa-home me-1"></i> Assign Households`;
+    });
+});
+
+// fade-out helper
+function fadeOutAlert(element, delay) {
+  setTimeout(() => {
+    element.style.transition = "opacity 0.8s ease";
+    element.style.opacity = "0";
+    setTimeout(() => element.remove(), 800);
+  }, delay);
+}
+</script>
+
+
+
+
+
+{% endblock %}
+

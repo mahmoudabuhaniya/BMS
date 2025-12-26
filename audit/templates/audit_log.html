@@ -1,0 +1,211 @@
+{% extends 'myproject/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-4">
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h2 class="fw-bold text-primary mb-0">Audit Trail</h2>
+    <div class="d-flex">
+        <a href="{% url 'audit_export_csv' %}" class="btn btn-outline-secondary btn-sm me-2">
+            <i class="bi bi-filetype-csv"></i> CSV
+        </a>
+        <a href="{% url 'audit_export_excel' %}" class="btn btn-outline-success btn-sm me-2">
+            <i class="bi bi-file-earmark-excel"></i> Excel
+        </a>
+        <a href="{% url 'audit_export_pdf' %}" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-file-earmark-pdf"></i> PDF
+        </a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-light fw-semibold">Filters</div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">User</label>
+                <select name="user" class="form-select">
+                    <option value="">All</option>
+                    {% for u in users %}
+                        <option value="{{ u.id }}" {% if request.GET.user == u.id|stringformat:"s" %}selected{% endif %}>
+                            {{ u.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Action</label>
+                <select name="action" class="form-select">
+                    <option value="">All</option>
+                    {% for a in actions %}
+                        <option value="{{ a }}" {% if request.GET.action == a %}selected{% endif %}>
+                            {{ a|upper }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Date From</label>
+                <input type="date" name="date_from" value="{{ request.GET.date_from }}" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Date To</label>
+                <input type="date" name="date_to" value="{{ request.GET.date_to }}" class="form-control">
+            </div>
+
+            <div class="col-12 d-flex justify-content-end mt-2">
+                <button type="submit" class="btn btn-primary me-2">Filter</button>
+                <a href="{% url 'audit_logs' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Audit Table -->
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle mb-0 text-center">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Model</th>
+                        <th>Record ID</th>
+                        <th>Description</th>
+                        <th>Timestamp</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.user.username }}</td>
+                        <td>
+                            {% if log.action == "CREATE" %}
+                                <span class="badge bg-success">CREATE</span>
+                            {% elif log.action == "UPDATE" %}
+                                <span class="badge bg-warning text-dark">UPDATE</span>
+                            {% elif log.action == "DELETE" %}
+                                <span class="badge bg-danger">DELETE</span>
+                            {% elif log.action == "LOGIN" %}
+                                <span class="badge bg-info text-dark">LOGIN</span>
+                            {% elif log.action == "LOGOUT" %}
+                                <span class="badge bg-secondary">LOGOUT</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.model_name }}</td>
+                        <td>{{ log.record_id }}</td>
+                        <td>{{ log.description|default:"-" }}</td>
+                        <td>{{ log.timestamp|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            {% if log.changes %}
+                                <button class="btn btn-outline-primary btn-sm" onclick="viewAuditDetails({{ log.id }})">
+                                    View
+                                </button>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-muted py-4">No audit logs found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="p-3 d-flex justify-content-center">
+            {% if logs.has_other_pages %}
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if logs.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ logs.previous_page_number }}{% if request.GET %}&{% for key,value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value|urlencode }}&{% endif %}{% endfor %}{% endif %}">&laquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                    {% endif %}
+
+                    {% for num in logs.paginator.page_range %}
+                        {% if logs.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET %}&{% for key,value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value|urlencode }}&{% endif %}{% endfor %}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if logs.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ logs.next_page_number }}{% if request.GET %}&{% for key,value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value|urlencode }}&{% endif %}{% endfor %}{% endif %}">&raquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+```
+
+</div>
+
+<!-- Audit Detail Modal -->
+
+<div class="modal fade" id="auditDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Audit Log Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="auditDetailContent">
+                <p class="text-center text-muted p-4">Loading...</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal.fade .modal-dialog { transition: transform .2s ease-out!important; }
+.modal.show .modal-dialog { transform: none!important; }
+.modal-content { border-radius: 10px; }
+</style>
+
+<script>
+function viewAuditDetails(id) {
+    const modal = new bootstrap.Modal(document.getElementById('auditDetailModal'));
+    const content = document.getElementById('auditDetailContent');
+
+    content.innerHTML = "<p class='text-center text-muted p-4'>Loading...</p>";
+
+    fetch(`/audit/logs/${id}/detail/`)
+        .then(r => r.text())
+        .then(html => {
+            content.innerHTML = html;
+            modal.show();
+        })
+        .catch(() => {
+            content.innerHTML = "<p class='text-danger p-4'>Failed to load data.</p>";
+            modal.show();
+        });
+}
+</script>
+
+{% endblock %}

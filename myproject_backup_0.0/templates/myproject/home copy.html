@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Page</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+    }
+
+    #message-banner {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      width: auto;
+      max-width: 90%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message-box {
+      padding: 12px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      font-size: 15px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      animation: fadeIn 0.4s ease-in-out;
+      opacity: 1;
+      transition: opacity 1s ease-out;
+    }
+
+    .message-success {
+      background-color: #e6f4ea;
+      color: #257942;
+      border-left: 5px solid #34a853;
+    }
+
+    .message-error {
+      background-color: #fdecea;
+      color: #d93025;
+      border-left: 5px solid #d93025;
+    }
+
+    .message-warning {
+      background-color: #fff4e5;
+      color: #b65f00;
+      border-left: 5px solid #f9ab00;
+    }
+
+    .message-info {
+      background-color: #e8f0fe;
+      color: #1967d2;
+      border-left: 5px solid #4285f4;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 10px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    /* Main content container centered with padding for banner */
+    body1 {
+        font-family: "Segoe UI", sans-serif;
+        background: #f4f6f8;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .container {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    h1 {
+        margin-bottom: 30px;
+        color: #0072c6;
+    }
+    .btn {
+        display: block;
+        width: 200px;
+        margin: 10px auto;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: #0072c6;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .btn:hover {
+        background: #005fa3;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="alert alert-info text-center">
+      Last Sync Data: {{ last_sync_time }}
+  </div>
+
+  {% if messages %}
+  <div id="message-container" style="position: fixed; top: 10px; width: 100%; text-align: center; z-index: 9999;">
+      {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" style="display: inline-block; padding: 10px 20px; border-radius: 8px; font-size: 16px;">
+              {{ message }}
+          </div>
+      {% endfor %}
+  </div>
+  <script>
+      setTimeout(function() {
+          var msg = document.getElementById("message-container");
+          if (msg) { msg.style.display = "none"; }
+      }, 5000);
+  </script>
+  {% endif %}
+
+  <div class="container">
+    <!-- Your main content goes here -->
+    {% block content %}
+    
+    <div class="container">
+        <h1>UNICEF BDMS Dashboard</h1>
+        <a href="{% url 'inform_data' %}" class="btn">📋 View InForm Data</a>
+        <a href="/admin/" class="btn">🔐 Admin Panel</a>
+        <button id="syncBtn" class="btn btn-success btn-lg mb-4">🔄 Sync Data</button>
+
+<div id="syncMessage" style="margin-top:10px;"></div>
+
+<script>
+document.getElementById("syncBtn").addEventListener("click", function(event) {
+    event.preventDefault(); // Stop page reload
+
+    // Show "Syncing..." immediately
+    let msgDiv = document.getElementById("syncMessage");
+    msgDiv.innerHTML = `<div class="alert alert-info">🔄 Syncing, please wait...</div>`;
+
+    fetch("{% url 'sync_inform_data' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // ✅ Show actual response from Django
+        msgDiv.innerHTML = `<div class="alert ${data.status === 'success' ? 'alert-success' : 'alert-danger'}">
+            ${data.message}
+        </div>`;
+        
+        setTimeout(() => msgDiv.innerHTML = "", 7000); // Hide after 5s
+    })
+    .catch(error => {
+        msgDiv.innerHTML = "<div class='alert alert-danger'>❌ Sync failed due to network error.</div>";
+    });
+});
+</script>
+
+        </form>
+    </div>
+    
+    {% endblock %}
+  </div>
+
+</body>
+</html>
+
+
+
+
+
+    
+

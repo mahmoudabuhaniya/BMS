@@ -1,0 +1,173 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BDMS - Beneficiary Database Management System</title>
+    <link rel="icon" href="{% static 'img/RDBMS4.jpg' %}" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #009FE3, #00B4D8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .login-wrapper {
+            display: flex;
+            width: 950px;
+            max-width: 95%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 45px rgba(0, 0, 0, 0.25);
+            background: #ffffff;
+        }
+
+        /* Left side - UNICEF branding */
+        .login-info {
+            background: linear-gradient(135deg, #009FE3, #00B4D8);
+            color: white;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .login-info img {
+            width: 110px;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-info h2 {
+            font-weight: bold;
+            font-size: 1.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .login-info p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Right side - Login form */
+        .login-form {
+            flex: 1.1;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-form h4 {
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+
+        .login-form p {
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ced4da;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #009FE3;
+            box-shadow: 0 0 5px rgba(0, 159, 227, 0.5);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #009FE3, #00B4D8);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0077B6, #0096C7);
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.85rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .login-wrapper {
+                flex-direction: column;
+            }
+            .login-info {
+                padding: 2rem;
+            }
+            .login-form {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <!-- UNICEF Info Panel -->
+    <div class="login-info">
+        <img src="{% static 'img/unicef_logo_white.jpg' %}" alt="UNICEF Logo" style="width: 200px;">
+        <BR>
+        <h2>UNICEF State of Palestine</h2>
+        <BR>
+        <p>Beneficiary Database Management System (BDMS)<br>Data integrity, transparency, and accountability in action.</p>
+    </div>
+
+    <!-- Login Form -->
+    <div class="login-form">
+        <h4><i class="fas fa-user-circle me-2 text-primary"></i>Login to BDMS</h4>
+        <p>Please enter your credentials to access the system.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger fade show py-2">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+
+        <footer>
+            &copy; {{ now|date:"Y" }} UNICEF State of Palestine — All Rights Reserved.
+        </footer>
+    </div>
+</div>
+
+</body>
+</html>

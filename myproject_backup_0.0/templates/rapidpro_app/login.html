@@ -1,0 +1,49 @@
+{% extends 'rapidpro_app/base.html' %}
+
+{% block content %}
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-warning" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header text-center bg-primary text-white">
+                    <h5>Login</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <p><strong>Error:</strong> Please correct the errors below.</p>
+                            </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="id_username" name="username" placeholder="Enter your username">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="id_password" name="password" placeholder="Enter your password">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+                    <!--
+                    <p class="text-center mt-3">
+                        Don't have an account? <a href="{% url 'register' %}" class="text-primary">Register here</a>
+                    </p>
+                    
+                    -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

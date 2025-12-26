@@ -1,0 +1,112 @@
+{% extends 'rapidpro_app/base.html' %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div class="d-flex align-items-center">
+            <h1 class="h3 mb-0 text-primary fw-bold">Flow Chat List</h1>
+            <span class="badge bg-success ms-3 rounded-pill px-3 py-2">Active Chats</span>
+        </div>
+        <div class="d-flex align-items-right">
+            <a href="{% url 'flow_list' %}?workspace_id={{ wsuuid }}&page={{ flowpage }}" class="btn btn-outline-primary me-2 d-flex align-items-center">
+                <i class="fas fa-project-diagram me-2"></i>Flows
+            </a>
+            <a href="{% url 'workspace_list' %}" class="btn btn-outline-primary me-2 d-flex align-items-center">
+                <i class="fas fa-briefcase me-2"></i>Workspaces
+            </a>
+            <a href="{% url 'dashboard' %}" class="btn btn-primary d-flex align-items-center">
+                <i class="fas fa-chart-line me-2"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Flow Runs Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th class="ps-4">Flow</th>
+                            <th>Contact</th>
+                            <th>URN</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Exited</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for flowrun in flowruns %}
+                        <tr>
+                            <td class="ps-4">{{ flowrun.flowname }}</td>
+                            <td>{{ flowrun.contactname }}</td>
+                            <td>{{ flowrun.urn }}</td>
+                            <td>
+                                <span class="badge {% if flowrun.exit_type == 'completed' %}bg-success{% elif flowrun.exit_type == 'interrupted' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ flowrun.exit_type }}
+                                </span>
+                            </td>
+                            <td>{{ flowrun.created_on }}</td>
+                            <td>{{ flowrun.exited_on }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'flowrun_detail' flowrun.id %}?flow_id={{ flowuuid }}&workspace_id={{ wsuuid }}&flowpage={{ flowpage }}&flowrunpage={{ flowrunpage }}" 
+                                   class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-comment-dots me-2"></i>View Messages
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <div class="alert alert-info d-inline-flex align-items-center">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No flow runs found
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?flow_id={{ flowuuid }}&workspace_id={{ wsuuid }}&page={{ page_obj.previous_page_number }}&flowpage={{ flowpage }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+    
+            {% for num in page_range %}
+                {% if num == '...' %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% elif num == page_obj.number %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?flow_id={{ flowuuid }}&workspace_id={{ wsuuid }}&page={{ num }}&flowpage={{ flowpage }}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+    
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?flow_id={{ flowuuid }}&workspace_id={{ wsuuid }}&page={{ page_obj.next_page_number }}&flowpage={{ flowpage }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    
+    
+</div>
+{% endblock %}

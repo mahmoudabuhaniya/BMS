@@ -1,0 +1,294 @@
+{% extends "myproject/base.html" %}
+{% block content %}
+
+<!-- Alert Placeholder -->
+      <div id="form-alert" class="alert alert-warning d-none text-center rounded-3 shadow-sm"></div>
+      
+
+<div class="container py-4">
+  <div class="card shadow border-0 rounded-4">
+    <div class="card-body">
+
+      <h3 class="fw-bold text-primary mb-4">
+        <i class="fas fa-check-circle me-2"></i> Eligibility Check
+      </h3>
+
+      <form id="eligibilityForm" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <!-- FILTERS -->
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label>Section *</label>
+            <select name="sector" class="form-select" required>
+              <option value="">Select Section</option>
+              {% for s in sector_list %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label>IP Name *</label>
+            <select name="ip_name" class="form-select" required>
+              <option value="">Select IP</option>
+              {% for ip in ip_list %}<option value="{{ ip }}">{{ ip }}</option>{% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label>Supply Type *</label>
+            <select name="supply_type" id="supply_type" class="form-select" required>
+              <option value="">Select Supply</option>
+              {% for s in supply_list %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label>Benefit Date *</label>
+            <input type="date" name="benefit_date" id="benefit_date"
+                   class="form-control" value="{{ today }}" required>
+          </div>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="mt-4">
+          <label>Search Beneficiary (ID / Name)</label>
+          <input type="text" id="searchBox" class="form-control"
+                 placeholder="Start typing ID or Name">
+        </div>
+
+        <!-- RESULTS -->
+        <table class="table table-bordered mt-3 d-none" id="resultsTable">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th>ID Number</th>
+              <th>IP</th>
+              <th>Supply</th>
+              <th>Benefit Date</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <input type="hidden" name="beneficiary_id" id="beneficiary_id">
+
+        <!-- ELIGIBILITY -->
+        <div id="eligibilityCard" class="d-none mt-4"></div>
+
+        <!-- ACTIONS -->
+        <div class="text-end mt-4">
+          <button id="submitBtn" type="button"
+                  class="btn btn-success d-none">
+            Submit Supply
+          </button>
+
+          <button id="overrideBtn" type="button"
+                  class="btn btn-warning d-none">
+            Override & Submit
+          </button>
+
+
+          <a href="{% url 'supply_dashboard' %}" class="btn btn-secondary">Exit</a>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const form = document.getElementById("eligibilityForm");
+const alertBox = document.getElementById("form-alert");
+const searchBox = document.getElementById("searchBox");
+const table = document.getElementById("resultsTable");
+const tbody = table.querySelector("tbody");
+const card = document.getElementById("eligibilityCard");
+const submitBtn = document.getElementById("submitBtn");
+const overrideBtn = document.getElementById("overrideBtn");
+const beneficiaryInput = document.getElementById("beneficiary_id");
+
+let alertTimer = null;
+
+function showAlert(msg, type = "warning") {
+  clearTimeout(alertTimer);
+
+  alertBox.className = `alert alert-${type} text-center rounded-3 shadow-sm`;
+  alertBox.innerHTML = msg;
+  alertBox.classList.remove("d-none");
+
+  alertTimer = setTimeout(() => {
+    alertBox.classList.add("d-none");
+  }, 3500);
+}
+
+function resetEligibilityUI() {
+  card.classList.add("d-none");
+  submitBtn.classList.add("d-none");
+  overrideBtn.classList.add("d-none");
+}
+
+["supply_type","benefit_date","searchBox"].forEach(id => {
+  document.getElementById(id)?.addEventListener("change", resetEligibilityUI);
+});
+
+/* 🔍 SEARCH */
+searchBox.addEventListener("keyup", async () => {
+  const q = searchBox.value.trim();
+  if (q.length < 2) return table.classList.add("d-none");
+
+  const res = await fetch(`/supplies/eligibility-search/?q=${q}`);
+  const data = await res.json();
+
+  tbody.innerHTML = "";
+  table.classList.remove("d-none");
+
+  data.results.forEach(b => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${b.name}</td><td>${b.id_number}</td>
+                    <td>${b.ip_name}</td><td>${b.supply_type}</td>
+                    <td>${b.benefit_date || ""}</td>`;
+    tr.onclick = () => {
+        // Remove selection from all rows
+        document.querySelectorAll("#resultsTable tbody tr")
+            .forEach(r => r.classList.remove("selected"));
+
+        // Mark this row as selected
+        tr.classList.add("selected");
+
+        // Run eligibility check
+        evaluateEligibility(b.id);
+    };
+
+    tbody.appendChild(tr);
+  });
+});
+
+/* 🧮 ELIGIBILITY CHECK */
+async function evaluateEligibility(id) {
+  beneficiaryInput.value = id;
+
+  const supply = supply_type.value;
+  const date = benefit_date.value;
+
+  if (!supply || !date) {
+    showAlert("Please select Supply Type and Benefit Date.");
+    return;
+  }
+
+  const res = await fetch(`/supplies/eligibility-evaluate/?beneficiary_id=${id}&supply_type=${supply}&benefit_date=${date}`);
+  const data = await res.json();
+
+  card.classList.remove("d-none");
+
+  if (data.eligible) {
+    card.innerHTML = `<div class="alert alert-success">✅ Eligible</div>`;
+    submitBtn.classList.remove("d-none");
+    overrideBtn.classList.add("d-none");
+  } else {
+    card.innerHTML = `<div class="alert alert-danger">❌ Not Eligible<br>Last: ${data.last_benefit_date || "N/A"}</div>`;
+    overrideBtn.classList.remove("d-none");
+    submitBtn.classList.add("d-none");
+  }
+}
+
+/* 🚀 SUBMIT */
+async function submitSupply(override) {
+  const requiredFields = ["sector","ip_name","supply_type","benefit_date"];
+  let missing = [];
+  const fd = new FormData(form);
+  fd.append("override", override);
+  requiredFields.forEach(field => {
+    const el = document.querySelector(`[name='${field}']`);
+    if (!el || !el.value.trim()) {
+      el.classList.add("is-invalid");
+      missing.push(field);
+    } else {
+      el.classList.remove("is-invalid");
+    }
+  });
+
+  if (missing.length > 0) {
+    showAlert(
+    `<i class="fas fa-exclamation-triangle me-2"></i> Please fill all required fields.`,
+    "warning"
+  );
+  return; // ⛔ ABSOLUTE STOP
+  }
+
+  
+
+  const res = await fetch("{% url 'eligibility_submit' %}", {
+    method: "POST",
+    body: fd,
+    headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value }
+  });
+
+  const data = await res.json();
+  if (!res.ok || data.error) {
+    showAlert(data.error || "Submission failed", "danger");
+    return;
+  }
+
+  showAlert(data.message, "success");
+  resetEligibilityUI();
+  beneficiaryInput.value = "";
+  searchBox.dispatchEvent(new Event("keyup"));
+}
+
+submitBtn.onclick = () => submitSupply(0);
+overrideBtn.onclick = () => submitSupply(1);
+</script>
+
+
+
+
+
+
+<!-- Styles -->
+<style>
+    .form-control, .form-select {
+        border-radius: 0.6rem;
+        border: 1px solid #d0d7de;
+        transition: box-shadow 0.2s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #0099ff;
+        box-shadow: 0 0 0 0.2rem rgba(0,153,255,0.25);
+    }
+    .is-invalid {
+        border-color: #dc3545 !important;
+        color: #dc3545;
+        background-color: #fff6f6;
+    }
+    
+    .btn-primary {
+        background-color: #0099ff;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #007acc;
+    }
+
+    /* Make rows clickable */
+    #resultsTable tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    }
+
+    /* Hover */
+    #resultsTable tbody tr:hover td {
+    background-color: #f1f7ff !important;
+    }
+
+    /* Selected row (FORCE it) */
+    #resultsTable tbody tr.selected td {
+    background-color: #dbeafe !important; /* light UNICEF blue */
+    }
+
+</style>
+
+<!-- Validation Script -->
+
+
+{% endblock %}

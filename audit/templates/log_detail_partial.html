@@ -1,0 +1,18 @@
+<div class="p-3">
+    <h5 class="mb-3 text-primary">Audit Details</h5>
+
+    <p><strong>User:</strong> {{ log.user.username }}</p>
+    <p><strong>Action:</strong> {{ log.action }}</p>
+    <p><strong>Model:</strong> {{ log.model_name }}</p>
+    <p><strong>Record ID:</strong> {{ log.object_id }}</p>
+    <p><strong>Description:</strong> {{ log.description|default:"-" }}</p>
+    <p><strong>Timestamp:</strong> {{ log.timestamp }}</p>
+
+    {% if log.changes %}
+    <hr>
+    <h6 class="fw-bold">Changes</h6>
+    <pre class="border bg-light p-3 rounded">
+{{ log.changes|safe }}
+    </pre>
+    {% endif %}
+</div>

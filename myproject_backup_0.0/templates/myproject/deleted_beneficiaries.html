@@ -1,0 +1,70 @@
+{% extends 'myproject/base.html' %}
+{% block content %}
+<div class="container py-5">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-user-slash text-primary fs-3 me-2"></i>
+      <h2 class="text-primary fw-bold mb-0">Deleted Beneficiaries</h2>
+      <span class="badge bg-info text-light rounded-pill px-3 py-2 ms-3 fw-semibold">
+        Manage Deleted Records
+      </span>
+    </div>
+    <a href="{% url 'home' %}" class="btn btn-outline-primary">
+      <i class="fas fa-home me-1"></i> Back to Home
+    </a>
+  </div>
+
+  
+
+  {% if records %}
+    <div class="card shadow-lg border-0 rounded-4">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-primary fw-bold">
+              <tr>
+                <th><i class="fas fa-hashtag me-1"></i> #</th>
+                <th><i class="fas fa-database me-1"></i> InForm ID</th>
+                <th><i class="fas fa-user me-1"></i> Name</th>
+                <th><i class="fas fa-id-card me-1"></i> ID Number</th>
+                <th><i class="fas fa-phone-alt me-1"></i> Phone</th>
+                <th><i class="fas fa-calendar-times me-1"></i> Deleted On</th>
+                <th><i class="fas fa-cogs me-1"></i> Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in records %}
+              <tr>
+                <td class="fw-semibold">{{ forloop.counter }}</td>
+                <td>{{ r.InForm_ID|default:"—" }}</td>
+                <td>{{ r.Name|default:"—" }}</td>
+                <td>{{ r.ID_Number|default:"—" }}</td>
+                <td>{{ r.Phone_Number|default:"—" }}</td>
+                <td>{{ r.deleted_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                  <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="pk" value="{{ r.pk }}">
+                    <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                      <i class="fas fa-undo me-1"></i> Restore
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info d-flex align-items-center mt-4 shadow-sm rounded-3">
+      <i class="fas fa-info-circle me-2 fs-5 text-primary"></i>
+      No deleted records found.
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

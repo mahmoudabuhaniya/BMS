@@ -1,0 +1,167 @@
+{% extends 'myproject/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-primary mb-0">
+          <i class="fas fa-user-edit me-2 text-primary"></i> Edit Beneficiary Details
+        </h3>
+
+        <a href="javascript:history.back()" class="btn btn-dark btn-sm">
+          <i class="fas fa-arrow-left me-1"></i> Back
+        </a>
+      </div>
+      <div class="alert alert-info d-flex align-items-center justify-content-between" role="alert">
+            <!-- Left side: Name with icon -->
+            <span class="fw-bold text-dark">
+                <i class="fas fa-user me-2"></i> {{ record.Name|default:"N/A" }}
+            </span>
+
+            <!-- Right side: Instance ID badge -->
+            <span class="badge bg-info text-light fs-6 px-3 py-2">
+                Instance ID: {{ record.InstanceID }}
+            </span>
+      </div>
+
+      <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="row g-4">
+          <!-- Record Information -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">Record ID</label>
+            <input type="text" name="record_id" value="{{ record.record_id }}" class="form-control bg-light" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">IP Name</label>
+            <input type="text" name="IP_Name" value="{{ record.IP_Name }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Sector</label>
+            <input type="text" name="Sector" value="{{ record.Sector }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Indicator</label>
+            <input type="text" name="Indicator" value="{{ record.Indicator }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Date</label>
+            <input type="date" name="Date" value="{{ record.Date }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Name</label>
+            <input type="text" name="Name" value="{{ record.Name }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">ID Number</label>
+            <input type="text" name="ID_Number" value="{{ record.ID_Number }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Parent ID</label>
+            <input type="text" name="Parent_ID" value="{{ record.Parent_ID }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Spouse ID</label>
+            <input type="text" name="Spouse_ID" value="{{ record.Spouse_ID }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Phone Number</label>
+            <input type="text" name="Phone_Number" value="{{ record.Phone_Number }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Date of Birth</label>
+            <input type="date" name="Date_of_Birth" value="{{ record.Date_of_Birth }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Age</label>
+            <input type="number" name="Age" value="{{ record.Age }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Gender</label>
+            <select name="Gender" class="form-select">
+              <option value="Male" {% if record.Gender == "Male" %}selected{% endif %}>Male</option>
+              <option value="Female" {% if record.Gender == "Female" %}selected{% endif %}>Female</option>
+              <option value="Other" {% if record.Gender == "Other" %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Governorate</label>
+            <input type="text" name="Governorate" value="{{ record.Governorate }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Municipality</label>
+            <input type="text" name="Municipality" value="{{ record.Municipality }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Neighborhood</label>
+            <input type="text" name="Neighborhood" value="{{ record.Neighborhood }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Site Name</label>
+            <input type="text" name="Site_Name" value="{{ record.Site_Name }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Disability Status</label>
+            <input type="text" name="Disability_Status" value="{{ record.Disability_Status }}" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">Household ID</label>
+            <input type="text" name="Household_ID" value="{{ record.Household_ID }}" class="form-control bg-light" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">Submission Time</label>
+            <input type="text" name="Submission_Time" value="{{ record.Submission_Time }}" class="form-control bg-light" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">Created At</label>
+            <input type="text" name="created_at" value="{{ record.created_at }}" class="form-control bg-light" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">Deleted</label>
+            <input type="text" name="Deleted" value="{{ record.Deleted }}" class="form-control bg-light" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">Deleted At</label>
+            <input type="text" name="deleted_at" value="{{ record.deleted_at }}" class="form-control bg-light" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">Undeleted At</label>
+            <input type="text" name="undeleted_at" value="{{ record.undeleted_at }}" class="form-control bg-light" readonly>
+          </div>
+        </div>
+
+        <div class="text-end mt-4">
+          <button type="submit" class="btn btn-success px-4">
+            <i class="fas fa-save me-2"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

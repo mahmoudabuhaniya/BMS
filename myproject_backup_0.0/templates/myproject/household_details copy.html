@@ -1,0 +1,74 @@
+{% extends 'myproject/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-primary mb-0">
+          <i class="fas fa-users me-2 text-primary"></i> Household Details
+        </h3>
+
+        <a href="javascript:history.back()" class="btn btn-dark btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Back
+        </a>
+      </div>
+
+      <div class="alert alert-info d-flex align-items-center" role="alert">
+        <i class="fas fa-user-tie fa-lg me-2"></i>
+        <div><strong>Head of Household:</strong> {{ head.Name }} ({{ head.Gender }}, {{ head.Age }} years)</div>
+        <span class="badge bg-info text-light fs-6 px-3 py-2" style="margin-left: auto;">
+          Household ID: {{ household_id }}
+        </span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="bg-light text-primary fw-bold">
+            <tr>
+              <th><i class="fas fa-user me-1"></i>Name</th>
+              <th><i class="fas fa-venus-mars me-1"></i>Gender</th>
+              <th><i class="fas fa-calendar-alt me-1"></i>Age</th>
+              <th><i class="fas fa-id-card me-1"></i>ID Number</th>
+              <th><i class="fas fa-sitemap me-1"></i>Relationship</th>
+              <th><i class="fas fa-map-marker-alt me-1"></i>Location</th>
+              <th><i class="fas fa-info-circle me-1"></i>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in relationships %}
+            <tr>
+              <td class="fw-semibold">{{ item.member.Name }}</td>
+              <td>{{ item.member.Gender }}</td>
+              <td>{{ item.member.Age }}</td>
+              <td>{{ item.member.ID_Number }}</td>
+              <td>
+                {% if item.relation == 'Head' %}
+                  <span class="badge bg-success"><i class="fas fa-crown me-1"></i> Head</span>
+                {% elif item.relation == 'Spouse' %}
+                  <span class="badge bg-info"><i class="fas fa-heart me-1"></i> Spouse</span>
+                {% else %}
+                  <span class="badge bg-secondary"><i class="fas fa-child me-1"></i> Child</span>
+                {% endif %}
+              </td>
+              <td>{{ item.member.Site_Name }}<br><small class="text-muted">{{ item.member.Governorate }}</small></td>
+              <td>
+                <a href="{% url 'beneficiary_details' item.member.record_id %}" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-eye"></i> View
+                </a>
+                
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 text-end">
+        <span class="text-muted">Total members: {{ total_members }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

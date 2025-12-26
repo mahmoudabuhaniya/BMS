@@ -1,0 +1,332 @@
+{% extends 'myproject/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body">
+
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-primary mb-0">
+          <i class="fas fa-file-excel me-2 text-primary"></i> Bulk Import from Excel
+        </h3>
+        <a href="javascript:history.back()" class="btn btn-dark btn-sm">
+          <i class="fas fa-arrow-left me-1"></i> Back
+        </a>
+      </div>
+
+      <!-- Django Messages -->
+      {% if messages %}
+      <div>
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} text-center fade show mb-3 rounded-3 shadow-sm">
+          <i class="fas fa-info-circle me-2"></i>{{ message|safe }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Alert Placeholder -->
+      <div id="form-alert" class="alert alert-warning d-none text-center rounded-3 shadow-sm"></div>
+
+
+        <div style="margin-bottom: 20px;">
+            <a href="{% static 'Bulk-Import-Data-Template.xlsx' %}" 
+            download 
+            class="btn btn-outline-success">
+                Download Excel Template
+            </a>
+        </div>
+
+
+      <!-- Form -->
+      <form id="bulkForm" class="needs-validation" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <div class="row g-4">
+          <!-- Excel file -->
+          <div class="col-md-8">
+            <label class="form-label fw-semibold text-primary">
+              <i class="fas fa-file-excel me-1"></i> Excel file (.xlsx) <span class="text-danger">*</span>
+            </label>
+            <input type="file" name="excel_file" id="excel_file" accept=".xlsx, .xls" class="form-control shadow-sm" required>
+            <small class="text-danger"><BR>* First row must be headers.<BR>* Mandatory Fields: <B>(Name, ID_Number, Sector, IP_Name)</B> <BR>* Common headers: Phone_Number, Date_of_Birth, Age, Gender, Governorate, Indicator, Date</small>
+          </div>
+
+          <!-- IP Name -->
+          <div class="col-md-4">
+            <label class="form-label fw-semibold text-primary">
+              <i class="fas fa-building me-1"></i> Implementing Partner (IP) <span class="text-danger">*</span>
+            </label>
+            <select name="ip_name" id="ip_name" class="form-select shadow-sm" required>
+              <option value="">Select Implementing Partner</option>
+              {% for ip in ip_list %}
+              <option value="{{ ip }}">{{ ip }}</option>
+              {% endfor %}
+            </select>
+            <small class="text-danger"><BR>* Imported rows without IP_Name will be assigned this IP.</small>
+          </div>
+
+          <!-- Controls -->
+          <div class="col-12">
+            <div id="form-alert" class="alert d-none text-center rounded-3 shadow-sm"></div>
+          </div>
+        </div>
+
+        <div class="text-end mt-4">
+          <button type="button" id="startImportBtn" class="btn btn-primary px-5 py-2 fw-semibold shadow-sm">
+            <i class="fas fa-cloud-upload-alt me-2"></i> Start Import
+          </button>
+        </div>
+      </form>
+
+      <!-- Progress area -->
+      <div class="mt-4 d-none" id="progress-area">
+        <h6 class="mb-2">Progress</h6>
+        <div class="progress rounded-pill" style="height: 18px;">
+          <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
+        </div>
+        <div id="progress-details" class="small text-muted mt-2">
+          Stage: <span id="stage-text">Waiting</span> |
+          Processed: <span id="processed">0</span> / <span id="total">0</span> |
+          Created: <span id="created">0</span> |
+          Failed: <span id="failed">0</span>
+        </div>
+
+        
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const startBtn = document.getElementById('startImportBtn');
+  const excelInput = document.getElementById('excel_file');
+  const ipSelect = document.getElementById('ip_name');
+  const alertBox = document.getElementById('form-alert');
+
+  const progressArea = document.getElementById('progress-area');
+  const progressBar = document.getElementById('progress-bar');
+  const stageText = document.getElementById('stage-text');
+  const processedSpan = document.getElementById('processed');
+  const totalSpan = document.getElementById('total');
+  const createdSpan = document.getElementById('created');
+  const failedSpan = document.getElementById('failed');
+  const errorsBox = document.getElementById('errors-box');
+  const errorsList = document.getElementById('errors-list');
+
+  let pollInterval = null;
+
+  function showAlert(text, type='warning') {
+    alertBox.className = 'alert alert-' + type + ' text-center rounded-3 shadow-sm';
+    alertBox.innerHTML = '<i class="fas fa-info-circle me-2"></i>' + text;
+    alertBox.classList.remove('d-none');
+    if (type !== 'danger') {
+      setTimeout(()=> alertBox.classList.add('d-none'), 5000);
+    }
+  }
+
+  function stopSpinner() {
+    startBtn.disabled = false;
+    startBtn.innerHTML = '<i class="fas fa-cloud-upload-alt me-2"></i> Start Import';
+  }
+
+  function startSpinner() {
+    startBtn.disabled = true;
+    startBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+  }
+
+  function startPolling() {
+    progressArea.classList.remove('d-none');
+
+    if (pollInterval) clearInterval(pollInterval);
+
+    pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch("{% url 'get_bulk_progress' %}");
+        if (!res.ok) throw new Error('Network error');
+        const data = await res.json();
+
+        stageText.textContent = data.stage || '';
+        const pct = data.progress || 0;
+        progressBar.style.width = pct + '%';
+        progressBar.textContent = pct + '%';
+
+        processedSpan.textContent = data.processed || 0;
+        totalSpan.textContent = data.total || 0;
+        createdSpan.textContent = data.created || 0;
+        failedSpan.textContent = data.failed || 0;
+
+        // Errors
+        if (data.errors?.length) {
+          errorsBox.classList.remove('d-none');
+          errorsList.innerHTML = data.errors.map(err => `<li>${err}</li>`).join('');
+        } else {
+          errorsBox.classList.add('d-none');
+          errorsList.innerHTML = '';
+        }
+
+        // 🔥 FINAL FIX — STOP SPINNER WHEN DONE
+        if (data.completed) {
+          showAlert(
+            'Import completed. Created: ' + (data.created||0) + 
+            ' — Failed: ' + (data.failed||0),
+            'success'
+          );
+
+          clearInterval(pollInterval);
+          pollInterval = null;
+
+          stopSpinner();
+        }
+
+      } catch (err) {
+        console.error(err);
+        showAlert('Could not fetch progress. Check network or server.', 'danger');
+        clearInterval(pollInterval);
+        pollInterval = null;
+        stopSpinner();
+      }
+
+    }, 2000);
+  }
+
+  // Start import
+  startBtn.addEventListener('click', async function(){
+    if (!excelInput.files.length) {
+      showAlert('Please select an Excel file to upload.', 'warning');
+      excelInput.classList.add('is-invalid');
+      return;
+    }
+    if (!ipSelect.value) {
+      showAlert('Please choose an Implementing Partner (IP).', 'warning');
+      ipSelect.classList.add('is-invalid');
+      return;
+    }
+
+    startSpinner();
+
+    const fd = new FormData();
+    fd.append('excel_file', excelInput.files[0]);
+    fd.append('ip_name', ipSelect.value);
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    try {
+      const res = await fetch("{% url 'start_bulk_import' %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+        body: fd
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.status !== 'started') {
+        stopSpinner();
+        showAlert(data.message || 'Failed to start import.', 'danger');
+        return;
+      }
+
+      showAlert('Import started — progress panel will appear now.', 'info');
+      startPolling();
+
+    } catch (err) {
+      console.error(err);
+      stopSpinner();
+      showAlert('Network error starting import.', 'danger');
+    }
+  });
+
+})();  
+</script>
+
+
+<!-- Validation Script -->
+<script>
+document.getElementById("bulkForm").addEventListener("submit", function(event) {
+  const requiredFields = ["excel_file", "ip_name"];
+  let missing = [];
+
+  requiredFields.forEach(field => {
+    const el = document.querySelector(`[name='${field}']`);
+    if (!el || !el.value.trim()) {
+      el.classList.add("is-invalid");
+      missing.push(field);
+    } else {
+      el.classList.remove("is-invalid");
+    }
+  });
+
+  if (missing.length > 0) {
+    event.preventDefault();
+    const alertBox = document.getElementById("form-alert");
+    alertBox.classList.remove("d-none");
+    alertBox.classList.add("alert-warning");
+    alertBox.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i> Please fill all required fields.`;
+
+    // Shake animation
+    alertBox.animate([
+      { transform: "translateX(0)" },
+      { transform: "translateX(-8px)" },
+      { transform: "translateX(8px)" },
+      { transform: "translateX(0)" }
+    ], { duration: 400 });
+
+    // Fade out after 3 seconds
+    setTimeout(() => {
+      alertBox.style.transition = "opacity 0.8s";
+      alertBox.style.opacity = "0";
+      setTimeout(() => alertBox.classList.add("d-none"), 800);
+    }, 3000);
+  }
+});
+</script>
+
+<!-- Validation Script -->
+<script>
+  (() => {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+</script>
+
+<!-- Styles -->
+<style>
+  .form-control, .form-select {
+    border-radius: 0.6rem;
+    border: 1px solid #d0d7de;
+    transition: box-shadow 0.2s ease;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: #0099ff;
+    box-shadow: 0 0 0 0.2rem rgba(0,153,255,0.25);
+  }
+  .is-invalid {
+    border-color: #dc3545 !important;
+    color: #dc3545;
+    background-color: #fff6f6;
+  }
+  
+  .btn-primary {
+    background-color: #0099ff;
+    border: none;
+  }
+  .btn-primary:hover {
+    background-color: #007acc;
+  }
+</style>
+
+<!-- Validation Script -->
+
+{% endblock %}
+

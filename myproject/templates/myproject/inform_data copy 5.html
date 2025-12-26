@@ -1,0 +1,53 @@
+{% extends 'myproject/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Page Header -->
+   <div class="d-flex justify-content-between align-items-left mb-4">
+    <h2 class="fw-bold text-primary mx-auto">Beneficiary Database</h2>
+    <a href="{% url 'home' %}" class="btn btn-outline-primary"><i class="fas fa-home"></i> Back to Home</a>
+</div>
+
+    <!-- Filters -->
+    <div class="row g-2 mb-3">
+        {% for field, label in filter_fields %}
+            <div class="col-sm-6 col-md-3">
+                <input type="text" class="form-control filter-input" placeholder="Search {{ label }}" data-field="{{ field }}">
+            </div>
+        {% endfor %}
+    </div>
+
+   <!-- Table + Pagination Container -->
+    <div id="table-container">
+        {% include 'myproject/inform_table.html' %}
+    </div>
+
+</div>
+
+<script>
+const filters = document.querySelectorAll('.filter-input');
+
+filters.forEach(input => {
+    input.addEventListener('input', () => {
+        const params = new URLSearchParams();
+        filters.forEach(f => {
+            if(f.value) params.append(f.dataset.field, f.value);
+        });
+
+        fetch("{% url 'inform_data' %}?" + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('table-container').innerHTML = html;
+        });
+    });
+});
+
+// Fade out messages
+setTimeout(() => {
+    document.querySelectorAll('.fade-out').forEach(el => el.classList.add('hide'));
+}, 5000);
+</script>
+{% endblock %}

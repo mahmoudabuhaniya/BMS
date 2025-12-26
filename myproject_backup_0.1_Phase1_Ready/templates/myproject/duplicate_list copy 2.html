@@ -1,0 +1,109 @@
+{% extends "myproject/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Page Heading -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary d-flex align-items-center">
+      <i class="fas fa-clone me-2 text-primary"></i> Duplicate Beneficiaries
+    </h2>
+    <a href="{% url 'home' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+      <i class="fas fa-arrow-left me-1"></i> Back
+    </a>
+  </div>
+
+  <!-- Info Alert -->
+  <div class="alert alert-info bg-opacity-10 border-info text-primary mb-4 shadow-sm">
+    <i class="fas fa-info-circle me-1"></i>
+    Below are the duplicate beneficiary records found in your database.
+  </div>
+
+  <!-- Table -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0 table-hover">
+          <thead class="table-primary text-nowrap">
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>ID Number</th>
+              <th>Gender</th>
+              <th>Governorate</th>
+              <th>IP Name</th>
+              <th>Added Date</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in duplicates %}
+            <tr>
+              <td>{{ record.id }}</td>
+              <td>{{ record.Name }}</td>
+              <td>{{ record.ID_Number }}</td>
+              <td>{{ record.Gender }}</td>
+              <td>{{ record.Governorate }}</td>
+              <td>{{ record.IP_Name }}</td>
+              <td>{{ record.Submission_Time|date:"Y-m-d" }}</td>
+              <td class="text-center">
+                <button type="button" 
+                  class="btn btn-sm btn-outline-info" 
+                  title="View details"
+                  data-pk="{{ submission.pk }}"
+                  data-inform="{{ submission.InForm_ID|default:'null' }}"
+                  onclick="window.location.href='{% url 'beneficiary_details' record.pk %}'">
+                  <i class="fas fa-eye"></i>
+                </button>
+                
+                <button type="button" 
+                  class="btn btn-sm btn-outline-secondary" 
+                  title="View Household"
+                  onclick="window.location.href='{% url 'household_details' record.Household_ID %}'">
+                  <i class="fas fa-users"></i>
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" class="text-center">No records found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+  .table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  thead.table-primary {
+    background-color: #0099ff !important;
+    color: white;
+  }
+  tbody tr:hover {
+    background-color: rgba(0, 153, 255, 0.05);
+  }
+  .btn-outline-primary {
+    border-color: #0099ff;
+    color: #0099ff;
+  }
+  .btn-outline-primary:hover {
+    background-color: #0099ff;
+    color: white;
+  }
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+  }
+  .alert-info {
+    background-color: rgba(0, 153, 255, 0.08);
+  }
+</style>
+
+{% endblock %}

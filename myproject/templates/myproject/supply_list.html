@@ -1,0 +1,59 @@
+{% extends 'myproject/base.html' %}
+{% block content %}
+
+<div class="container py-5">
+
+  <div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body p-0">
+
+      <div class="d-flex justify-content-between p-3">
+        <h5 class="fw-bold text-primary">
+          <i class="fas fa-boxes-stacked me-2"></i> Supply List
+        </h5>
+        <a href="{% url 'supply_add' %}" class="btn btn-success btn-sm">
+          <i class="fas fa-plus"></i> Add Supply
+        </a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="bg-light text-primary">
+            <tr>
+              <th>Section</th>
+              <th>IP Name</th>
+              <th>Supply Type</th>
+              <th>Eligibility</th>
+              <th>Distribution Date</th>
+              <th width="120">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in supplies %}
+            <tr id="row-{{ s.id }}">
+              <td>{{ s.section }}</td>
+              <td>{{ s.ip_name }}</td>
+              <td class="fw-semibold">{{ s.supply_type }}</td>
+              <td>{{ s.eligibility_period }}</td>
+              <td>{{ s.distribution_date|default:"-" }}</td>
+              <td>
+                <a href="{% url 'supply_update' s.id %}" class="btn btn-sm btn-outline-info">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <button class="btn btn-sm btn-outline-danger delete-btn" data-pk="{{ s.id }}">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center">No supplies found</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% include 'myproject/partials/delete_modal.html' %}
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'myproject/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Django Messages -->
+      {% if messages %}
+      <div>
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} text-center fade show mb-3 rounded-3 shadow-sm">
+          <i class="fas fa-info-circle me-2"></i>{{ message|safe }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+<!-- Alert Placeholder -->
+      <div id="form-alert" class="alert alert-warning d-none text-center rounded-3 shadow-sm"></div>
+      
+<div class="container py-5">
+  <div class="card shadow border-0 rounded-4">
+    <div class="card-body">
+
+      <h3 class="fw-bold text-primary mb-4">
+        <i class="fas fa-file-import me-2"></i> Bulk Supply Import
+      </h3>
+
+      <a href="{% static 'Supply-Bulk-Import-Template.xlsx' %}"
+         class="btn btn-outline-success mb-3">
+        <i class="fas fa-download me-1"></i> Download Excel Template
+      </a>
+
+      <form method="post" enctype="multipart/form-data" class="needs-validation" id="addBulkForm"
+            action="{% url 'bulk_supply_import' %}" novalidate>
+        {% csrf_token %}
+
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Section <span class="text-danger">*</span></label>
+            <select name="section" class="form-select shadow-sm" required>
+              <option value="">Select Section</option>
+              {% for section in section_list %}
+                <option value="{{ section }}">{{ section }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">IP Name <span class="text-danger">*</span></label>
+            <select name="ip_name" class="form-select shadow-sm" required>
+              <option value="">Select IP</option>
+              {% for ip in ip_list %}
+                <option value="{{ ip }}">{{ ip }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">
+              Supply Type <span class="text-danger">*</span>
+            </label>
+            <select name="supply_type" class="form-select shadow-sm" required>
+              <option value="">Select Supply</option>
+              {% for s in supply_list %}
+                <option value="{{ s }}">{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">
+              Benefit Date <span class="text-danger">*</span>
+            </label>
+            <input type="date" name="benefit_date"
+                   class="form-control shadow-sm" required>
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label fw-semibold">
+              Excel File <span class="text-danger">*</span>
+            </label>
+            <input type="file" name="excel_file"
+                   class="form-control shadow-sm" accept=".xlsx" required>
+            <small class="text-danger">
+              <BR>* Required columns: <b>ID_Number</b>, <b>Name</b>
+            </small>
+          </div>
+
+        </div>
+
+        <div class="text-end mt-4">
+          <button class="btn btn-primary px-5">
+            <i class="fas fa-eye me-1"></i> Preview Import
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- Validation Script -->
+<!-- Validation Script -->
+<script>
+document.getElementById("addBulkForm").addEventListener("submit", function(event) {
+  const requiredFields = ["section", "supply_type", "ip_name", "benefit_date", "excel_file"];
+  let missing = [];
+
+  requiredFields.forEach(field => {
+    const el = document.querySelector(`[name='${field}']`);
+    if (!el || !el.value.trim()) {
+      el.classList.add("is-invalid");
+      missing.push(field);
+    } else {
+      el.classList.remove("is-invalid");
+    }
+  });
+
+  if (missing.length > 0) {
+    event.preventDefault();
+    const alertBox = document.getElementById("form-alert");
+    alertBox.classList.remove("d-none");
+    alertBox.classList.add("alert-warning");
+    alertBox.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i> Please fill all required fields.`;
+
+    // Shake animation
+    alertBox.animate([
+      { transform: "translateX(0)" },
+      { transform: "translateX(-8px)" },
+      { transform: "translateX(8px)" },
+      { transform: "translateX(0)" }
+    ], { duration: 400 });
+
+    // Fade out after 3 seconds
+    setTimeout(() => {
+      alertBox.style.transition = "opacity 0.8s";
+      alertBox.style.opacity = "0";
+      setTimeout(() => alertBox.classList.add("d-none"), 800);
+    }, 3000);
+  }
+});
+</script>
+
+<!-- Validation Script -->
+<script>
+  (() => {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+</script>
+
+<!-- Styles -->
+<style>
+  .form-control, .form-select {
+    border-radius: 0.6rem;
+    border: 1px solid #d0d7de;
+    transition: box-shadow 0.2s ease;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: #0099ff;
+    box-shadow: 0 0 0 0.2rem rgba(0,153,255,0.25);
+  }
+  .is-invalid {
+    border-color: #dc3545 !important;
+    color: #dc3545;
+    background-color: #fff6f6;
+  }
+  
+  .btn-primary {
+    background-color: #0099ff;
+    border: none;
+  }
+  .btn-primary:hover {
+    background-color: #007acc;
+  }
+</style>
+
+
+
+{% endblock %}

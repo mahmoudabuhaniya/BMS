@@ -1,0 +1,21 @@
+# Environment variables
+.env
+
+# Other common ignores for Django/Flutter (add these for completeness)
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.db
+*.sqlite3
+media/
+staticfiles/
+# Flutter-specific
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+.dart_tool/
+.pub-cache/

@@ -1,0 +1,37 @@
+name: bms_mobile_app
+description: Offline-first beneficiary management app with sync queue
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  uuid: ^4.4.2
+
+  provider: ^6.0.5
+  http: ^1.2.2
+
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  path_provider: ^2.1.2
+
+  font_awesome_flutter: ^10.7.0
+
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.9
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/unicef_logo.png

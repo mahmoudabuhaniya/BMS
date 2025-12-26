@@ -1,0 +1,391 @@
+{% extends 'myproject/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow-lg border-0 rounded-4" style="background: rgba(255, 255, 255, 0.95);">
+    <div class="card-body p-4">
+
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h3 class="fw-bold text-primary mb-0 d-flex align-items-center">
+          <i class="fas fa-user-pen me-2 text-primary"></i> Edit Beneficiary Details
+        </h3>
+        <a href="javascript:history.back()" class="btn btn-outline-primary btn-sm fw-semibold shadow-sm">
+          <i class="fas fa-arrow-left me-1"></i> Back
+        </a>
+      </div>
+
+      <!-- Beneficiary Summary -->
+      <div class="alert alert-info d-flex align-items-center justify-content-between shadow-sm rounded-3 py-3 px-4 mb-4" style="background: rgba(0,159,227,0.1); border-left: 5px solid #009FE3;">
+        <span class="fw-bold text-dark fs-6">
+          <i class="fas fa-user-circle me-2 text-primary"></i> {{ record.Name|default:"N/A" }}
+          (<span class="text-danger fw-semibold">ID: {{ record.ID_Number|default:"N/A" }}</span>)
+        </span>
+        <span class="badge bg-primary text-light fs-6 px-3 py-2 shadow-sm rounded-pill">
+          <i class="fas fa-fingerprint me-1"></i> Instance ID: {{ record.InstanceID }}
+        </span>
+      </div>
+
+      <!-- Form -->
+      <form method="post" class="needs-validation" id="editBenForm" novalidate>
+        {% csrf_token %}
+        <div class="row g-4">
+
+          <!-- SECTION: General Information -->
+          <h5 class="fw-bold text-primary mt-3 mb-2"><i class="fas fa-circle-info me-2"></i> General Information</h5>
+          <hr class="mt-0 mb-3 border-primary opacity-50">
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-user me-1 text-primary"></i> Name <span class="text-danger">*</span></label>
+            <input type="text" name="Name" value="{{ record.Name }}" class="form-control rounded-3 shadow-sm" required>
+            <div class="invalid-feedback">Please enter the beneficiary's name.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-id-card me-1 text-primary"></i> ID Number <span class="text-danger">*</span></label>
+            <input type="text" name="ID_Number" value="{{ record.ID_Number }}" class="form-control rounded-3 shadow-sm" required>
+            <div class="invalid-feedback">ID Number is required.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-venus-mars me-1 text-primary"></i> Gender</label>
+            <select name="Gender" class="form-select rounded-3 shadow-sm">
+              <option value="">Select Gender</option>
+              <option value="M" {% if record.Gender == "M" %}selected{% endif %}>Male</option>
+              <option value="F" {% if record.Gender == "F" %}selected{% endif %}>Female</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-calendar-day me-1 text-primary"></i> Date of Birth</label>
+            <input type="date" name="Date_of_Birth" value="{{ record.Date_of_Birth }}" class="form-control rounded-3 shadow-sm">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-hourglass-half me-1 text-primary"></i> Age</label>
+            <input type="number" name="Age" value="{{ record.Age }}" class="form-control rounded-3 shadow-sm" min="0">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-phone me-1 text-primary"></i> Phone Number</label>
+            <input type="text" name="Phone_Number" value="{{ record.Phone_Number }}" class="form-control rounded-3 shadow-sm">
+          </div>
+
+          <!-- SECTION: Family and Location -->
+          <h5 class="fw-bold text-primary mt-4 mb-2"><i class="fas fa-people-roof me-2"></i> Family and Location</h5>
+          <hr class="mt-0 mb-3 border-primary opacity-50">
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-venus-mars me-1 text-primary"></i> Marital Status</label>
+            <select name="Marital_Status" class="form-select rounded-3 shadow-sm">
+              <option value="">Select Marital Status</option>
+              <option value="Single" {% if record.Marital_Status == "Single" %}selected{% endif %}>Single</option>
+              <option value="Married" {% if record.Marital_Status == "Married" %}selected{% endif %}>Married</option>
+              <option value="Divorced" {% if record.Marital_Status == "Divorced" %}selected{% endif %}>Divorced</option>
+              <option value="Widow" {% if record.Marital_Status == "Widow" %}selected{% endif %}>Widow</option>
+              <option value="Separated" {% if record.Marital_Status == "Separated" %}selected{% endif %}>Separated</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-users me-1 text-primary"></i> Household Members</label>
+            <input type="number" name="HH_Members" value="{{ record.HH_Members }}" class="form-control rounded-3 shadow-sm" min="0">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-user-friends me-1 text-primary"></i> Parent ID</label>
+            <input type="text" name="Parent_ID" value="{{ record.Parent_ID }}" class="form-control rounded-3 shadow-sm">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-ring me-1 text-primary"></i> Spouse ID</label>
+            <input type="text" name="Spouse_ID" value="{{ record.Spouse_ID }}" class="form-control rounded-3 shadow-sm">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-map-marker-alt me-1 text-primary"></i> Governorate</label>
+            <input type="text" name="Governorate" value="{{ record.Governorate }}" class="form-control rounded-3 shadow-sm">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-city me-1 text-primary"></i> Municipality</label>
+            <input type="text" name="Municipality" value="{{ record.Municipality }}" class="form-control rounded-3 shadow-sm">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-street-view me-1 text-primary"></i> Neighborhood</label>
+            <input type="text" name="Neighborhood" value="{{ record.Neighborhood }}" class="form-control rounded-3 shadow-sm">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-map-pin me-1 text-primary"></i> Site Name</label>
+            <input type="text" name="Site_Name" value="{{ record.Site_Name }}" class="form-control rounded-3 shadow-sm">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-wheelchair me-1 text-primary"></i> Disability Status</label>
+            <select name="Disability_Status" class="form-select shadow-sm">
+              <option value="{{ record.Disability_Status }}">{{ record.Disability_Status }}</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+            
+          </div>
+
+          <!-- SECTION: Project Information -->
+          <h5 class="fw-bold text-primary mt-4 mb-2"><i class="fas fa-diagram-project me-2"></i> Project Information</h5>
+          <hr class="mt-0 mb-3 border-primary opacity-50">
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-handshake me-1 text-primary"></i> IP Name <span class="text-danger">*</span></label>
+            <select name="IP_Name" class="form-select rounded-3 shadow-sm" required>
+              <option value="">Select Implementing Partner</option>
+              {% for ip in ip_list %}
+                <option value="{{ ip }}" {% if record.IP_Name == ip %}selected{% endif %}>{{ ip }}</option>
+              {% endfor %}
+            </select>
+            <div class="invalid-feedback">Please select an IP Name.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-industry me-1 text-primary"></i> Sector <span class="text-danger">*</span></label>
+            <select name="Sector" class="form-select rounded-3 shadow-sm" required>
+              <option value="">Select Sector</option>
+              {% for sector in sector_list %}
+                <option value="{{ sector }}" {% if record.Sector == sector %}selected{% endif %}>{{ sector }}</option>
+              {% endfor %}
+            </select>
+            <div class="invalid-feedback">Please select a sector.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-bullseye me-1 text-primary"></i> Indicator</label>
+            <input type="text" name="Indicator" value="{{ record.Indicator }}" class="form-control rounded-3 shadow-sm">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold"><i class="fas fa-calendar-check me-1 text-primary"></i> Date</label>
+            <input type="date" name="Date" value="{{ record.Date }}" class="form-control rounded-3 shadow-sm">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">
+              <i class="fas fa-box me-1 text-primary"></i> Supply Type
+            </label>
+            <select name="Supply_Type" class="form-select shadow-sm">
+              <option value="">Select Supply Type</option>
+              {% for s in supply_types %}
+                <option value="{{ s }}" {% if record.Supply_Type == s %}selected{% endif %}>
+                  {{ s }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">
+              <i class="fas fa-calendar-check me-1 text-primary"></i> Benefit Date
+            </label>
+            <input type="date"
+                  name="Benefit_Date"
+                  value="{{ record.Benefit_Date|date:'Y-m-d' }}"
+                  class="form-control shadow-sm">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-shield-halved me-1 text-primary"></i> Eligibility
+            </label>
+
+            {% if record.Eligiblity == True %}
+              <span class="badge bg-success px-3 py-2">
+                <i class="fas fa-check-circle me-1"></i> Eligible
+              </span>
+            {% else %}
+              <span class="badge bg-danger px-3 py-2">
+                <i class="fas fa-ban me-1"></i> Not Eligible
+              </span>
+            {% endif %}
+          </div>
+
+
+
+
+
+          <!-- SECTION: Metadata -->
+          <h5 class="fw-bold text-primary mt-4 mb-2"><i class="fas fa-database me-2"></i> Metadata</h5>
+          <hr class="mt-0 mb-3 border-primary opacity-50">
+
+          <div class="row g-3 mt-3">
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">
+              <i class="fas fa-tag me-1"></i> Record ID
+            </label>
+            <input type="text" value="{{ record.record_id }}" class="form-control bg-light rounded-3 shadow-sm" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">
+              <i class="fas fa-tag me-1"></i> Household ID
+            </label>
+            <input type="text" value="{{ record.Household_ID }}" class="form-control bg-light rounded-3 shadow-sm" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">
+              <i class="fas fa-clock me-1"></i> InForm Submission Time
+            </label>
+            <input type="text" value="{{ record.submission_time }}" class="form-control bg-light rounded-3 shadow-sm" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">
+              <i class="fas fa-calendar-alt me-1"></i> Created By
+            </label>
+            <input type="text" value="{{ record.created_by }}" class="form-control bg-light rounded-3 shadow-sm" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">
+              <i class="fas fa-calendar-alt me-1"></i> Created At
+            </label>
+            <input type="text" value="{{ record.created_at }}" class="form-control bg-light rounded-3 shadow-sm" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">
+              <i class="fas fa-calendar-alt me-1"></i> Updated By
+            </label>
+            <input type="text" value="{{ record.updated_by }}" class="form-control bg-light rounded-3 shadow-sm" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">
+              <i class="fas fa-calendar-alt me-1"></i> Updated At
+            </label>
+            <input type="text" value="{{ record.updated_at }}" class="form-control bg-light rounded-3 shadow-sm" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">
+              <i class="fas fa-times-circle me-1"></i> Deleted
+            </label>
+            <input type="text" value="{{ record.Deleted }}" class="form-control bg-light rounded-3 shadow-sm" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">
+              <i class="fas fa-calendar-times me-1"></i> Deleted At
+            </label>
+            <input type="text" value="{{ record.deleted_at }}" class="form-control bg-light rounded-3 shadow-sm" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted">
+              <i class="fas fa-calendar-check me-1"></i> Undeleted At
+            </label>
+            <input type="text" value="{{ record.undeleted_at }}" class="form-control bg-light rounded-3 shadow-sm" readonly>
+          </div>
+
+        </div>
+
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-end mt-5">
+          <button type="submit" class="btn btn-primary px-5 py-2 fw-semibold shadow-sm rounded-pill" style="background-color: #009FE3; border-color: #009FE3; transition: all 0.3s;">
+            <i class="fas fa-cloud-upload-alt me-2"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Validation Script -->
+<script>
+document.getElementById("editBenForm").addEventListener("submit", function(event) {
+  const requiredFields = ["Sector", "Name", "ID_Number", "IP_Name"];
+  let missing = [];
+
+  requiredFields.forEach(field => {
+    const el = document.querySelector(`[name='${field}']`);
+    if (!el || !el.value.trim()) {
+      el.classList.add("is-invalid");
+      missing.push(field);
+    } else {
+      el.classList.remove("is-invalid");
+    }
+  });
+
+  if (missing.length > 0) {
+    event.preventDefault();
+    const alertBox = document.getElementById("form-alert");
+    alertBox.classList.remove("d-none");
+    alertBox.classList.add("alert-warning");
+    alertBox.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i> Please fill all required fields.`;
+
+    // Shake animation
+    alertBox.animate([
+      { transform: "translateX(0)" },
+      { transform: "translateX(-8px)" },
+      { transform: "translateX(8px)" },
+      { transform: "translateX(0)" }
+    ], { duration: 400 });
+
+    // Fade out after 3 seconds
+    setTimeout(() => {
+      alertBox.style.transition = "opacity 0.8s";
+      alertBox.style.opacity = "0";
+      setTimeout(() => alertBox.classList.add("d-none"), 800);
+    }, 3000);
+  }
+});
+</script>
+
+<!-- Validation Script -->
+<script>
+  (() => {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+</script>
+
+<!-- Styles -->
+<style>
+  .form-control, .form-select {
+    border-radius: 0.6rem;
+    border: 1px solid #d0d7de;
+    transition: box-shadow 0.2s ease;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: #0099ff;
+    box-shadow: 0 0 0 0.2rem rgba(0,153,255,0.25);
+  }
+  .is-invalid {
+    border-color: #dc3545 !important;
+    color: #dc3545;
+    background-color: #fff6f6;
+  }
+  
+  .btn-primary {
+    background-color: #0099ff;
+    border: none;
+  }
+  .btn-primary:hover {
+    background-color: #007acc;
+  }
+</style>
+
+{% endblock %}
